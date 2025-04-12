@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import time
 
 st.set_page_config(page_title="Rock Paper Scissors", page_icon="🎮")
 st.title("✊ Rock 🧻 Paper ✂️ Scissors")
@@ -15,6 +16,8 @@ if 'computer_choice' not in st.session_state:
     st.session_state.computer_choice = ""
 if 'play_clicked' not in st.session_state:
     st.session_state.play_clicked = False
+if 'disable_play' not in st.session_state:
+    st.session_state.disable_play = False
 
 choices = ["Rock", "Paper", "Scissors"]
 
@@ -22,9 +25,13 @@ def clear_result():
     st.session_state.result = ""
     st.session_state.computer_choice = ""
     st.session_state.play_clicked = False
+    st.session_state.disable_play = False # Re-enable the Play button
 
-# Radio with on_change to clear previous result
-user_choice = st.radio("Choose your move:", choices, horizontal=True, key="user_choice", on_change=clear_result)
+# Radio with on_change to clear previous result and re-enable Play
+def user_choice_changed():
+    clear_result()
+
+user_choice = st.radio("Choose your move:", choices, horizontal=True, key="user_choice", on_change=user_choice_changed)
 
 # Game logic
 def play_game():
@@ -32,6 +39,7 @@ def play_game():
     user_choice = st.session_state.user_choice
     st.session_state.computer_choice = computer_choice
     st.session_state.play_clicked = True
+    st.session_state.disable_play = True # Disable the Play button after clicking
 
     if user_choice == computer_choice:
         st.session_state.result = "It's a tie!"
@@ -45,7 +53,8 @@ def play_game():
         st.session_state.computer_score += 1
 
 # Play Button
-if st.button("Play"):
+play_button = st.button("Play", disabled=st.session_state.disable_play)
+if play_button:
     play_game()
 
 # Show result only after Play is clicked
