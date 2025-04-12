@@ -2,7 +2,6 @@ import streamlit as st
 import random
 
 st.set_page_config(page_title="Rock Paper Scissors", page_icon="🎮")
-
 st.title("✊ Rock 🧻 Paper ✂️ Scissors")
 
 # Initialize session state
@@ -14,16 +13,25 @@ if 'result' not in st.session_state:
     st.session_state.result = ""
 if 'computer_choice' not in st.session_state:
     st.session_state.computer_choice = ""
+if 'play_clicked' not in st.session_state:
+    st.session_state.play_clicked = False
 
 choices = ["Rock", "Paper", "Scissors"]
 
-# When user changes their choice, clear previous result
-user_choice = st.radio("Choose your move:", choices, horizontal=True, key="user_choice")
+def clear_result():
+    st.session_state.result = ""
+    st.session_state.computer_choice = ""
+    st.session_state.play_clicked = False
 
+# Radio with on_change to clear previous result
+user_choice = st.radio("Choose your move:", choices, horizontal=True, key="user_choice", on_change=clear_result)
+
+# Game logic
 def play_game():
     computer_choice = random.choice(choices)
     user_choice = st.session_state.user_choice
     st.session_state.computer_choice = computer_choice
+    st.session_state.play_clicked = True
 
     if user_choice == computer_choice:
         st.session_state.result = "It's a tie!"
@@ -40,8 +48,8 @@ def play_game():
 if st.button("Play"):
     play_game()
 
-# Show result only if a round has been played
-if st.session_state.result:
+# Show result only after Play is clicked
+if st.session_state.play_clicked:
     st.success(f"You chose **{st.session_state.user_choice}**, computer chose **{st.session_state.computer_choice}**.")
     st.markdown(f"### {st.session_state.result}")
 
@@ -55,6 +63,5 @@ col2.metric("💻 Computer Score", st.session_state.computer_score)
 if st.button("Reset Scores"):
     st.session_state.user_score = 0
     st.session_state.computer_score = 0
-    st.session_state.result = ""
-    st.session_state.computer_choice = ""
+    clear_result()
     st.success("Scores have been reset.")
