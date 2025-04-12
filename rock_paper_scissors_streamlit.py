@@ -5,32 +5,45 @@ st.set_page_config(page_title="Rock Paper Scissors", page_icon="🎮")
 
 st.title("✊ Rock 🧻 Paper ✂️ Scissors")
 
-# Initialize scores in session state if not already present
+# Initialize session state
 if 'user_score' not in st.session_state:
     st.session_state.user_score = 0
 if 'computer_score' not in st.session_state:
     st.session_state.computer_score = 0
+if 'result' not in st.session_state:
+    st.session_state.result = ""
+if 'computer_choice' not in st.session_state:
+    st.session_state.computer_choice = ""
 
 choices = ["Rock", "Paper", "Scissors"]
-user_choice = st.radio("Choose your move:", choices, horizontal=True)
 
-if st.button("Play"):
+# When user changes their choice, clear previous result
+user_choice = st.radio("Choose your move:", choices, horizontal=True, key="user_choice")
+
+def play_game():
     computer_choice = random.choice(choices)
+    user_choice = st.session_state.user_choice
+    st.session_state.computer_choice = computer_choice
 
-    result = ""
     if user_choice == computer_choice:
-        result = "It's a tie!"
+        st.session_state.result = "It's a tie!"
     elif (user_choice == "Rock" and computer_choice == "Scissors") or \
          (user_choice == "Paper" and computer_choice == "Rock") or \
          (user_choice == "Scissors" and computer_choice == "Paper"):
-        result = "You win!"
+        st.session_state.result = "You win!"
         st.session_state.user_score += 1
     else:
-        result = "Computer wins!"
+        st.session_state.result = "Computer wins!"
         st.session_state.computer_score += 1
 
-    st.success(f"You chose **{user_choice}**, computer chose **{computer_choice}**.")
-    st.markdown(f"### {result}")
+# Play Button
+if st.button("Play"):
+    play_game()
+
+# Show result only if a round has been played
+if st.session_state.result:
+    st.success(f"You chose **{st.session_state.user_choice}**, computer chose **{st.session_state.computer_choice}**.")
+    st.markdown(f"### {st.session_state.result}")
 
 st.markdown("---")
 st.subheader("Game Score")
@@ -42,4 +55,6 @@ col2.metric("💻 Computer Score", st.session_state.computer_score)
 if st.button("Reset Scores"):
     st.session_state.user_score = 0
     st.session_state.computer_score = 0
+    st.session_state.result = ""
+    st.session_state.computer_choice = ""
     st.success("Scores have been reset.")
